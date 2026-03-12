@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Açaí Express Design System */
+    /* Purple Açaí - Primary */
+    --primary: 300 43% 21%;
+    --primary-foreground: 0 0% 96%;
+
+    /* White Ice - Background */
+    --background: 0 0% 96%;
+    --foreground: 0 0% 10%;
+
+    /* Card */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    /* Secondary */
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 10%;
+
+    /* Muted */
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 40%;
+
+    /* Accent - Yellow Cupuaçu */
+    --accent: 43 100% 70%;
+    --accent-foreground: 0 0% 10%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 96%;
+
+    /* Border */
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 300 43% 21%;
+
+    --radius: 0px;
+
+    /* Sidebar */
+    --sidebar-background: 300 43% 21%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 43 100% 70%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 300 43% 28%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 300 43% 28%;
+    --sidebar-ring: 43 100% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer utilities {
+  .font-heading {
+    font-family: 'Archivo Black', sans-serif;
+  }
+
+  .font-body {
+    font-family: 'Inter', sans-serif;
+  }
+}
