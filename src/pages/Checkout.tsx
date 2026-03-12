@@ -58,7 +58,7 @@ export default function Checkout() {
       console.error("Error saving order:", err);
     }
 
-    const mensagem = `*Pedido Açaí Express*
+    const mensagem = `*Pedido ${settings?.nome_loja || "Açaí Express"}*
 
 *Cliente:* ${form.nome.trim()}
 *Telefone:* ${form.telefone.trim()}

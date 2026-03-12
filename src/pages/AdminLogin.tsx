@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useSettings } from "@/hooks/use-supabase";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
+  const { data: settings } = useSettings();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,18 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen bg-primary flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-card p-8 border-2 border-border">
-        <h1 className="font-heading text-2xl uppercase text-center mb-2">AÇAÍ EXPRESS</h1>
+        <div className="flex flex-col items-center mb-2">
+          {settings?.logo_url && (
+            <img 
+              src={settings.logo_url} 
+              alt={settings.nome_loja || "Logo"} 
+              className="h-16 w-16 object-contain mb-3"
+            />
+          )}
+          <h1 className="font-heading text-2xl uppercase text-center">
+            {settings?.nome_loja || "AÇAÍ EXPRESS"}
+          </h1>
+        </div>
         <p className="text-center text-muted-foreground text-sm mb-8 font-body">Painel Administrativo</p>
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="border-2 border-border p-4">

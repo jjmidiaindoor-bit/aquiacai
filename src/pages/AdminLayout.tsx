@@ -4,6 +4,7 @@ import {
   LayoutDashboard, Package, Tag, ClipboardList, Settings, LogOut, Menu, X,
 } from "lucide-react";
 import { useState } from "react";
+import { useSettings } from "@/hooks/use-supabase";
 
 const NAV_ITEMS = [
   { label: "DASHBOARD", path: "/admin", icon: LayoutDashboard },
@@ -18,6 +19,7 @@ export default function AdminLayout() {
   const location = useLocation();
   const { signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { data: settings } = useSettings();
 
   const handleLogout = async () => {
     await signOut();
@@ -34,8 +36,21 @@ export default function AdminLayout() {
         sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       }`}>
         <div className="p-6 border-b border-sidebar-border">
-          <h1 className="font-heading text-lg uppercase text-sidebar-foreground">AÇAÍ EXPRESS</h1>
-          <p className="text-xs text-sidebar-foreground/60 font-body mt-1">Painel Admin</p>
+          <div className="flex items-center gap-3">
+            {settings?.logo_url && (
+              <img 
+                src={settings.logo_url} 
+                alt={settings.nome_loja || "Logo"} 
+                className="h-10 w-10 object-contain"
+              />
+            )}
+            <div>
+              <h1 className="font-heading text-lg uppercase text-sidebar-foreground">
+                {settings?.nome_loja || "AÇAÍ EXPRESS"}
+              </h1>
+              <p className="text-xs text-sidebar-foreground/60 font-body mt-1">Painel Admin</p>
+            </div>
+          </div>
         </div>
         <nav className="flex-1 py-4">
           {NAV_ITEMS.map((item) => {
