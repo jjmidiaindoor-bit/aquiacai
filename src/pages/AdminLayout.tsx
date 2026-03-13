@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  LayoutDashboard, Package, Tag, ClipboardList, Settings, LogOut, Menu, X,
+  LayoutDashboard, Package, Tag, ClipboardList, Settings, LogOut, Menu, X, Send,
 } from "lucide-react";
 import { useState } from "react";
 import { useSettings } from "@/hooks/use-supabase";
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: "PRODUTOS", path: "/admin/produtos", icon: Package },
   { label: "CATEGORIAS", path: "/admin/categorias", icon: Tag },
   { label: "PEDIDOS", path: "/admin/pedidos", icon: ClipboardList },
+  { label: "MARKETING", path: "/admin/marketing", icon: Send },
   { label: "CONFIGURAÇÕES", path: "/admin/configuracoes", icon: Settings },
 ];
 
