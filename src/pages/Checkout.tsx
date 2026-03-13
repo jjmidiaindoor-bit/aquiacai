@@ -14,6 +14,7 @@ export default function Checkout() {
   const [form, setForm] = useState({
     nome: "",
     telefone: "",
+    tipoEntrega: "", // "entrega" ou "retirada"
     endereco: "",
     observacao: "",
     formaPagamento: "",
@@ -30,8 +31,18 @@ export default function Checkout() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.nome.trim() || !form.telefone.trim() || !form.endereco.trim()) {
+    if (!form.nome.trim() || !form.telefone.trim()) {
       toast.error("Preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    if (!form.tipoEntrega) {
+      toast.error("Selecione o tipo de entrega.");
+      return;
+    }
+
+    if (form.tipoEntrega === "entrega" && !form.endereco.trim()) {
+      toast.error("Informe o endereço para entrega.");
       return;
     }
 
@@ -71,13 +82,21 @@ export default function Checkout() {
       }
     }
 
+    // Prepare delivery info
+    let entregaInfo = "";
+    if (form.tipoEntrega === "entrega") {
+      entregaInfo = `🚚 *Entrega no endereço:*\n${form.endereco.trim()}`;
+    } else {
+      entregaInfo = `🏪 *Retirada no local*\n${settings?.endereco || "Aguardando confirmação do endereço"}`;
+    }
+
     // Save order to database
     try {
       await createOrder.mutateAsync({
         nome_cliente: form.nome.trim(),
         telefone: form.telefone.trim(),
-        endereco: form.endereco.trim(),
-        observacao: `${form.observacao.trim() || ""}\n\n${pagamentoInfo}`.trim(),
+        endereco: form.tipoEntrega === "entrega" ? form.endereco.trim() : "RETIRADA NO LOCAL",
+        observacao: `Tipo: ${form.tipoEntrega === "entrega" ? "ENTREGA" : "RETIRADA"}\n${form.observacao.trim() || ""}\n\n${pagamentoInfo}`.trim(),
         detalhes_pedido: listaProdutos,
         total,
       });
@@ -97,8 +116,7 @@ ${listaProdutos}
 
 ${pagamentoInfo}
 
-*Endereço:*
-${form.endereco.trim()}
+${entregaInfo}
 
 *Observação:*
 ${form.observacao.trim() || "Nenhuma"}`;
@@ -144,7 +162,61 @@ ${form.observacao.trim() || "Nenhuma"}`;
         <form onSubmit={handleSubmit} className="space-y-4">
           <FormBlock label="NOME" name="nome" value={form.nome} onChange={handleChange} required />
           <FormBlock label="TELEFONE" name="telefone" value={form.telefone} onChange={handleChange} required />
-          <FormBlock label="ENDEREÇO" name="endereco" value={form.endereco} onChange={handleChange} required />
+          
+          {/* Delivery Type */}
+          <div className="border-2 border-border bg-card p-4">
+            <label className="font-heading text-xs uppercase tracking-wider block mb-3">
+              TIPO DE ENTREGA <span className="text-destructive">*</span>
+            </label>
+            <div className="space-y-2">
+              <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-border hover:border-accent transition-colors">
+                <input
+                  type="radio"
+                  name="tipoEntrega"
+                  value="entrega"
+                  checked={form.tipoEntrega === "entrega"}
+                  onChange={handleChange}
+                  className="w-4 h-4 accent-primary"
+                />
+                <span className="font-body text-sm">🚚 Entrega no endereço</span>
+              </label>
+              
+              <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-border hover:border-accent transition-colors">
+                <input
+                  type="radio"
+                  name="tipoEntrega"
+                  value="retirada"
+                  checked={form.tipoEntrega === "retirada"}
+                  onChange={handleChange}
+                  className="w-4 h-4 accent-primary"
+                />
+                <span className="font-body text-sm">🏪 Retirar no local</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Address - only show if delivery */}
+          {form.tipoEntrega === "entrega" && (
+            <FormBlock 
+              label="ENDEREÇO PARA ENTREGA" 
+              name="endereco" 
+              value={form.endereco} 
+              onChange={handleChange} 
+              required 
+            />
+          )}
+
+          {/* Store address info for pickup */}
+          {form.tipoEntrega === "retirada" && settings?.endereco && (
+            <div className="border-2 border-border bg-card p-4">
+              <label className="font-heading text-xs uppercase tracking-wider block mb-2">
+                🏪 ENDEREÇO PARA RETIRADA
+              </label>
+              <p className="font-body text-sm text-muted-foreground">
+                {settings.endereco}
+              </p>
+            </div>
+          )}
           
           {/* Payment Method */}
           <div className="border-2 border-border bg-card p-4">
