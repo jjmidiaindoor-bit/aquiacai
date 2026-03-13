@@ -16,6 +16,9 @@ export default function Checkout() {
     telefone: "",
     endereco: "",
     observacao: "",
+    formaPagamento: "",
+    precisaTroco: false,
+    valorTroco: "",
   });
 
   const handleChange = (
@@ -32,6 +35,16 @@ export default function Checkout() {
       return;
     }
 
+    if (!form.formaPagamento) {
+      toast.error("Selecione a forma de pagamento.");
+      return;
+    }
+
+    if (form.formaPagamento === "dinheiro" && form.precisaTroco && !form.valorTroco) {
+      toast.error("Informe o valor para o troco.");
+      return;
+    }
+
     if (items.length === 0) {
       toast.error("Seu carrinho está vazio.");
       return;
@@ -44,13 +57,27 @@ export default function Checkout() {
       )
       .join("\n");
 
+    // Prepare payment info
+    let pagamentoInfo = "";
+    if (form.formaPagamento === "pix") {
+      pagamentoInfo = "💳 *Pagamento:* PIX";
+    } else if (form.formaPagamento === "cartao") {
+      pagamentoInfo = "💳 *Pagamento:* Cartão";
+    } else if (form.formaPagamento === "dinheiro") {
+      if (form.precisaTroco) {
+        pagamentoInfo = `💵 *Pagamento:* Dinheiro\n💰 *Troco para:* R$ ${form.valorTroco}`;
+      } else {
+        pagamentoInfo = "💵 *Pagamento:* Dinheiro (não precisa de troco)";
+      }
+    }
+
     // Save order to database
     try {
       await createOrder.mutateAsync({
         nome_cliente: form.nome.trim(),
         telefone: form.telefone.trim(),
         endereco: form.endereco.trim(),
-        observacao: form.observacao.trim() || undefined,
+        observacao: `${form.observacao.trim() || ""}\n\n${pagamentoInfo}`.trim(),
         detalhes_pedido: listaProdutos,
         total,
       });
@@ -67,6 +94,8 @@ export default function Checkout() {
 ${listaProdutos}
 
 *Total: R$ ${total.toFixed(2).replace(".", ",")}*
+
+${pagamentoInfo}
 
 *Endereço:*
 ${form.endereco.trim()}
@@ -116,6 +145,85 @@ ${form.observacao.trim() || "Nenhuma"}`;
           <FormBlock label="NOME" name="nome" value={form.nome} onChange={handleChange} required />
           <FormBlock label="TELEFONE" name="telefone" value={form.telefone} onChange={handleChange} required />
           <FormBlock label="ENDEREÇO" name="endereco" value={form.endereco} onChange={handleChange} required />
+          
+          {/* Payment Method */}
+          <div className="border-2 border-border bg-card p-4">
+            <label className="font-heading text-xs uppercase tracking-wider block mb-3">
+              FORMA DE PAGAMENTO <span className="text-destructive">*</span>
+            </label>
+            <div className="space-y-2">
+              <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-border hover:border-accent transition-colors">
+                <input
+                  type="radio"
+                  name="formaPagamento"
+                  value="pix"
+                  checked={form.formaPagamento === "pix"}
+                  onChange={handleChange}
+                  className="w-4 h-4 accent-primary"
+                />
+                <span className="font-body text-sm">💳 PIX</span>
+              </label>
+              
+              <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-border hover:border-accent transition-colors">
+                <input
+                  type="radio"
+                  name="formaPagamento"
+                  value="cartao"
+                  checked={form.formaPagamento === "cartao"}
+                  onChange={handleChange}
+                  className="w-4 h-4 accent-primary"
+                />
+                <span className="font-body text-sm">💳 Cartão (Débito/Crédito)</span>
+              </label>
+              
+              <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-border hover:border-accent transition-colors">
+                <input
+                  type="radio"
+                  name="formaPagamento"
+                  value="dinheiro"
+                  checked={form.formaPagamento === "dinheiro"}
+                  onChange={handleChange}
+                  className="w-4 h-4 accent-primary"
+                />
+                <span className="font-body text-sm">💵 Dinheiro</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Change for Cash */}
+          {form.formaPagamento === "dinheiro" && (
+            <div className="border-2 border-border bg-card p-4 space-y-3">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.precisaTroco}
+                  onChange={(e) => setForm({ ...form, precisaTroco: e.target.checked, valorTroco: "" })}
+                  className="w-4 h-4 accent-primary"
+                />
+                <span className="font-heading text-xs uppercase tracking-wider">
+                  PRECISA DE TROCO?
+                </span>
+              </label>
+              
+              {form.precisaTroco && (
+                <div>
+                  <label className="font-heading text-xs uppercase tracking-wider block mb-2">
+                    TROCO PARA QUANTO? <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="valorTroco"
+                    value={form.valorTroco}
+                    onChange={handleChange}
+                    placeholder="Ex: 50,00"
+                    className="w-full bg-transparent font-body text-sm outline-none border-b-2 border-border pb-1 focus:border-accent transition-colors duration-100 text-foreground"
+                    required
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          
           <div className="border-2 border-border bg-card p-4">
             <label className="font-heading text-xs uppercase tracking-wider block mb-2">OBSERVAÇÃO</label>
             <textarea
